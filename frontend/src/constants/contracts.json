@@ -1,0 +1,1512 @@
+{
+  "Error": {
+    "type": "object",
+    "properties": {
+      "success": {
+        "type": "boolean",
+        "enum": [false]
+      },
+      "error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": ["field", "message"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["code", "message"],
+        "additionalProperties": false
+      }
+    },
+    "required": ["success", "error"],
+    "additionalProperties": false
+  },
+  "GeoPoint": {
+    "type": "object",
+    "properties": {
+      "type": {
+        "type": "string",
+        "enum": ["Point"]
+      },
+      "coordinates": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "items": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "description": "Exactly [longitude, latitude]: longitude -180..180; latitude -90..90. Both finite JSON numbers. Backend enforces position-specific bounds.",
+        "example": [-16.6, 13.4]
+      }
+    },
+    "required": ["type", "coordinates"],
+    "additionalProperties": false
+  },
+  "Registration": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 100
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "password": {
+        "type": "string",
+        "minLength": 12,
+        "maxLength": 72,
+        "format": "password",
+        "writeOnly": true,
+        "description": "At most 72 UTF-8 bytes, not merely characters. Never returned."
+      },
+      "role": {
+        "type": "string",
+        "enum": ["DONOR"]
+      }
+    },
+    "required": ["name", "email", "phone", "password"],
+    "additionalProperties": false
+  },
+  "Login": {
+    "type": "object",
+    "properties": {
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "password": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 72,
+        "format": "password",
+        "writeOnly": true
+      }
+    },
+    "required": ["email", "password"],
+    "additionalProperties": false
+  },
+  "User": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "name": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "role": {
+        "type": "string",
+        "enum": ["DONOR", "FACILITY_USER", "ADMIN"]
+      },
+      "isActive": {
+        "type": "boolean"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "role",
+      "isActive",
+      "createdAt",
+      "updatedAt"
+    ],
+    "additionalProperties": false
+  },
+  "Session": {
+    "type": "object",
+    "properties": {
+      "user": {
+        "$ref": "#/components/schemas/User"
+      },
+      "accessToken": {
+        "type": "string",
+        "description": "Short-lived signed bearer token; no real token example is published."
+      },
+      "tokenType": {
+        "type": "string",
+        "enum": ["Bearer"]
+      }
+    },
+    "required": ["user", "accessToken", "tokenType"],
+    "additionalProperties": false
+  },
+  "FacilityCreate": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 100
+      },
+      "facilityType": {
+        "type": "string",
+        "enum": ["HOSPITAL", "BLOOD_BANK", "HEALTH_CENTRE", "CLINIC", "OTHER"]
+      },
+      "referenceNumber": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "address": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 500
+      }
+    },
+    "required": ["name", "facilityType", "phone", "email", "address"],
+    "additionalProperties": false
+  },
+  "FacilityTransition": {
+    "type": "object",
+    "properties": {
+      "previousStatus": {
+        "type": "string",
+        "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]
+      },
+      "newStatus": {
+        "type": "string",
+        "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]
+      },
+      "performedBy": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "previousStatus",
+      "newStatus",
+      "performedBy",
+      "reason",
+      "timestamp"
+    ],
+    "additionalProperties": false
+  },
+  "Facility": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "name": {
+        "type": "string"
+      },
+      "facilityType": {
+        "type": "string",
+        "enum": ["HOSPITAL", "BLOOD_BANK", "HEALTH_CENTRE", "CLINIC", "OTHER"]
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "address": {
+        "type": "string"
+      },
+      "verificationStatus": {
+        "type": "string",
+        "enum": ["PENDING", "APPROVED", "REJECTED", "SUSPENDED"]
+      },
+      "isActive": {
+        "type": "boolean"
+      },
+      "referenceNumber": {
+        "type": "string"
+      },
+      "approvedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "approvedBy": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "rejectionReason": {
+        "type": "string"
+      },
+      "createdBy": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "statusHistory": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/FacilityTransition"
+        }
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "facilityType",
+      "phone",
+      "email",
+      "address",
+      "verificationStatus",
+      "isActive"
+    ],
+    "additionalProperties": false
+  },
+  "FacilityLocation": {
+    "type": "object",
+    "properties": {
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "location": {
+        "$ref": "#/components/schemas/GeoPoint"
+      },
+      "locationUpdatedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": ["facilityId", "location", "locationUpdatedAt"],
+    "additionalProperties": false
+  },
+  "StaffCreate": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 100
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "password": {
+        "type": "string",
+        "minLength": 12,
+        "maxLength": 72,
+        "format": "password",
+        "writeOnly": true,
+        "description": "At most 72 UTF-8 bytes, not merely characters. Never returned."
+      },
+      "permissions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VERIFY_DONORS",
+            "CREATE_BLOOD_REQUESTS",
+            "MANAGE_BLOOD_REQUESTS",
+            "CONFIRM_DONATIONS"
+          ]
+        },
+        "uniqueItems": true,
+        "maxItems": 4
+      }
+    },
+    "required": ["name", "email", "phone", "password"],
+    "additionalProperties": false
+  },
+  "Staff": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "name": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254,
+        "example": "example@example.invalid"
+      },
+      "phone": {
+        "type": "string",
+        "minLength": 7,
+        "maxLength": 30,
+        "pattern": "^\\+?[0-9 ()-]+$",
+        "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+      },
+      "role": {
+        "type": "string",
+        "enum": ["FACILITY_USER"]
+      },
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "permissions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VERIFY_DONORS",
+            "CREATE_BLOOD_REQUESTS",
+            "MANAGE_BLOOD_REQUESTS",
+            "CONFIRM_DONATIONS"
+          ]
+        },
+        "uniqueItems": true,
+        "maxItems": 4
+      },
+      "isActive": {
+        "type": "boolean"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "id",
+      "name",
+      "email",
+      "phone",
+      "role",
+      "facilityId",
+      "permissions",
+      "isActive",
+      "createdAt"
+    ],
+    "additionalProperties": false
+  },
+  "Reason": {
+    "type": "object",
+    "properties": {
+      "reason": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 1000
+      }
+    },
+    "required": ["reason"],
+    "additionalProperties": false
+  },
+  "VerificationInput": {
+    "type": "object",
+    "properties": {
+      "verifiedBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+      },
+      "notes": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 1000,
+        "description": "Minimum administrative context only, not a clinical record."
+      }
+    },
+    "required": ["verifiedBloodType"],
+    "additionalProperties": false
+  },
+  "VerificationStatusInput": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["SUSPENDED", "REQUIRES_REVERIFICATION"]
+      },
+      "reason": {
+        "type": "string",
+        "minLength": 3,
+        "maxLength": 1000
+      }
+    },
+    "required": ["status", "reason"],
+    "additionalProperties": false
+  },
+  "Verification": {
+    "type": "object",
+    "properties": {
+      "verificationStatus": {
+        "type": "string",
+        "enum": [
+          "UNVERIFIED",
+          "VERIFIED",
+          "SUSPENDED",
+          "REQUIRES_REVERIFICATION"
+        ]
+      },
+      "verifiedBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", null],
+        "nullable": true
+      },
+      "verifiedAt": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      },
+      "verifiedByFacility": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{24}$",
+            "example": "0123456789abcdef01234567"
+          },
+          "name": {
+            "type": "string"
+          },
+          "facilityType": {
+            "type": "string",
+            "enum": [
+              "HOSPITAL",
+              "BLOOD_BANK",
+              "HEALTH_CENTRE",
+              "CLINIC",
+              "OTHER"
+            ]
+          }
+        },
+        "required": ["id", "name", "facilityType"],
+        "additionalProperties": false,
+        "nullable": true
+      }
+    },
+    "required": [
+      "verificationStatus",
+      "verifiedBloodType",
+      "verifiedAt",
+      "verifiedByFacility"
+    ],
+    "additionalProperties": false
+  },
+  "DonorLookup": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "name": {
+        "type": "string"
+      },
+      "verificationStatus": {
+        "type": "string",
+        "enum": [
+          "UNVERIFIED",
+          "VERIFIED",
+          "SUSPENDED",
+          "REQUIRES_REVERIFICATION"
+        ]
+      },
+      "verifiedBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", null],
+        "nullable": true
+      }
+    },
+    "required": ["id", "name", "verificationStatus", "verifiedBloodType"],
+    "additionalProperties": false
+  },
+  "VerificationEvent": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "donorId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567",
+        "nullable": true
+      },
+      "performedBy": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "previousStatus": {
+        "type": "string",
+        "enum": [
+          "UNVERIFIED",
+          "VERIFIED",
+          "SUSPENDED",
+          "REQUIRES_REVERIFICATION"
+        ]
+      },
+      "newStatus": {
+        "type": "string",
+        "enum": [
+          "UNVERIFIED",
+          "VERIFIED",
+          "SUSPENDED",
+          "REQUIRES_REVERIFICATION"
+        ]
+      },
+      "verifiedBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", null],
+        "nullable": true
+      },
+      "reason": {
+        "type": "string"
+      },
+      "notes": {
+        "type": "string",
+        "description": "Only authorized verification-history readers receive internal notes."
+      },
+      "sequence": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "id",
+      "donorId",
+      "facilityId",
+      "performedBy",
+      "previousStatus",
+      "newStatus",
+      "verifiedBloodType",
+      "sequence",
+      "timestamp"
+    ],
+    "additionalProperties": false
+  },
+  "AvailabilityInput": {
+    "type": "object",
+    "properties": {
+      "availabilityStatus": {
+        "type": "string",
+        "enum": ["AVAILABLE", "UNAVAILABLE"]
+      }
+    },
+    "required": ["availabilityStatus"],
+    "additionalProperties": false
+  },
+  "ConsentInput": {
+    "type": "object",
+    "properties": {
+      "locationSharingEnabled": {
+        "type": "boolean"
+      }
+    },
+    "required": ["locationSharingEnabled"],
+    "additionalProperties": false
+  },
+  "LocationState": {
+    "type": "object",
+    "properties": {
+      "availabilityStatus": {
+        "type": "string",
+        "enum": ["AVAILABLE", "UNAVAILABLE"]
+      },
+      "locationSharingEnabled": {
+        "type": "boolean"
+      },
+      "hasLocation": {
+        "type": "boolean"
+      },
+      "currentLocation": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["Point"]
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          }
+        },
+        "required": ["type", "coordinates"],
+        "additionalProperties": false,
+        "nullable": true
+      },
+      "locationUpdatedAt": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      },
+      "isLocationFresh": {
+        "type": "boolean"
+      },
+      "locationReady": {
+        "type": "boolean"
+      }
+    },
+    "required": [
+      "availabilityStatus",
+      "locationSharingEnabled",
+      "hasLocation",
+      "currentLocation",
+      "locationUpdatedAt",
+      "isLocationFresh",
+      "locationReady"
+    ],
+    "additionalProperties": false
+  },
+  "RequestCreate": {
+    "type": "object",
+    "properties": {
+      "patientBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+      },
+      "unitsNeeded": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "urgency": {
+        "type": "string",
+        "enum": ["CRITICAL", "URGENT", "PLANNED"]
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Future expiry, within BLOOD_REQUEST_MAX_LIFETIME_HOURS. No patient identity or staff-supplied coordinates."
+      }
+    },
+    "required": ["patientBloodType", "unitsNeeded", "urgency", "expiresAt"],
+    "additionalProperties": false
+  },
+  "BloodRequest": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "requestingFacility": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "createdBy": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "patientBloodType": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+      },
+      "unitsNeeded": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "unitsReceived": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "remainingUnits": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "urgency": {
+        "type": "string",
+        "enum": ["CRITICAL", "URGENT", "PLANNED"]
+      },
+      "status": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "PARTIALLY_FILLED",
+          "FULFILLED",
+          "EXPIRED",
+          "CANCELLED"
+        ]
+      },
+      "requestLocation": {
+        "$ref": "#/components/schemas/GeoPoint"
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "fulfilledAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "cancelledAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "cancellationReason": {
+        "type": "string"
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "updatedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "id",
+      "requestingFacility",
+      "createdBy",
+      "patientBloodType",
+      "unitsNeeded",
+      "unitsReceived",
+      "remainingUnits",
+      "urgency",
+      "status",
+      "requestLocation",
+      "expiresAt",
+      "createdAt",
+      "updatedAt"
+    ],
+    "additionalProperties": false
+  },
+  "BroadcastInput": {
+    "type": "object",
+    "properties": {
+      "idempotencyKey": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "expand": {
+        "type": "boolean",
+        "default": false
+      },
+      "desiredCandidates": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100,
+        "default": 20
+      }
+    },
+    "required": ["idempotencyKey"],
+    "additionalProperties": false
+  },
+  "Broadcast": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "bloodRequest": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "radiusUsedKm": {
+        "type": "number"
+      },
+      "candidateCount": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "notifiedCount": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "createdAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": [
+      "id",
+      "bloodRequest",
+      "radiusUsedKm",
+      "candidateCount",
+      "notifiedCount",
+      "createdAt"
+    ],
+    "additionalProperties": false
+  },
+  "Notification": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "responseStatus": {
+        "type": "string",
+        "enum": ["PENDING", "ACCEPTED", "DECLINED"],
+        "description": "Derived own response state, not a separate PENDING response record."
+      },
+      "channel": {
+        "type": "string",
+        "enum": ["IN_APP", "EMAIL", "SMS", "WHATSAPP", "PUSH"]
+      },
+      "status": {
+        "type": "string",
+        "enum": ["DELIVERED", "READ"]
+      },
+      "sentAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "readAt": {
+        "type": "string",
+        "format": "date-time",
+        "nullable": true
+      },
+      "bloodRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{24}$",
+            "example": "0123456789abcdef01234567"
+          },
+          "patientBloodType": {
+            "type": "string",
+            "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+          },
+          "unitsNeeded": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "remainingUnits": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "urgency": {
+            "type": "string",
+            "enum": ["CRITICAL", "URGENT", "PLANNED"]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "OPEN",
+              "PARTIALLY_FILLED",
+              "FULFILLED",
+              "EXPIRED",
+              "CANCELLED"
+            ]
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "facility": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-fA-F0-9]{24}$",
+                "example": "0123456789abcdef01234567"
+              },
+              "name": {
+                "type": "string"
+              },
+              "address": {
+                "type": "string"
+              }
+            },
+            "required": ["id", "name", "address"],
+            "additionalProperties": false,
+            "nullable": true
+          },
+          "actionable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "patientBloodType",
+          "unitsNeeded",
+          "remainingUnits",
+          "urgency",
+          "status",
+          "expiresAt",
+          "facility",
+          "actionable"
+        ],
+        "additionalProperties": false,
+        "nullable": true
+      }
+    },
+    "required": [
+      "id",
+      "responseStatus",
+      "channel",
+      "status",
+      "sentAt",
+      "readAt",
+      "bloodRequest"
+    ],
+    "additionalProperties": false
+  },
+  "ResponseInput": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": ["ACCEPTED", "DECLINED"]
+      },
+      "location": {
+        "$ref": "#/components/schemas/GeoPoint",
+        "description": "Optional fresh device location only on acceptance; existing consent required."
+      }
+    },
+    "required": ["status"],
+    "additionalProperties": false
+  },
+  "DonorResponse": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "bloodRequest": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["ACCEPTED", "DECLINED"]
+      },
+      "respondedAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "required": ["id", "bloodRequest", "status", "respondedAt"],
+    "additionalProperties": false
+  },
+  "FacilityResponse": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "bloodRequest": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "status": {
+        "type": "string",
+        "enum": ["ACCEPTED", "DECLINED"]
+      },
+      "respondedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "donor": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{24}$",
+            "example": "0123456789abcdef01234567"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "minLength": 7,
+            "maxLength": 30,
+            "pattern": "^\\+?[0-9 ()-]+$",
+            "description": "7-15 digits; common international formatting accepted, including Gambian numbers."
+          },
+          "verifiedBloodType": {
+            "type": "string",
+            "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+          }
+        },
+        "required": ["id", "name", "phone", "verifiedBloodType"],
+        "additionalProperties": false,
+        "nullable": true,
+        "description": "Contact only for accepted, active, currently verified compatible donors on active owned requests; otherwise null."
+      }
+    },
+    "required": ["id", "bloodRequest", "status", "respondedAt", "donor"],
+    "additionalProperties": false
+  },
+  "DonationInput": {
+    "type": "object",
+    "properties": {
+      "donorId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "units": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      }
+    },
+    "required": ["donorId", "units"],
+    "additionalProperties": false
+  },
+  "Donation": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "donorId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "bloodRequest": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "confirmedAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "units": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "bloodTypeSnapshot": {
+        "type": "string",
+        "enum": ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+      }
+    },
+    "required": [
+      "id",
+      "donorId",
+      "bloodRequest",
+      "facilityId",
+      "confirmedAt",
+      "units",
+      "bloodTypeSnapshot"
+    ],
+    "additionalProperties": false
+  },
+  "AccountStatusInput": {
+    "type": "object",
+    "properties": {
+      "isActive": {
+        "type": "boolean"
+      },
+      "reasonCode": {
+        "type": "string",
+        "enum": ["ACCOUNT_REVIEW", "SECURITY_REVIEW", "USER_REQUEST"]
+      }
+    },
+    "required": ["isActive", "reasonCode"],
+    "additionalProperties": false
+  },
+  "AccountStatus": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "role": {
+        "type": "string",
+        "enum": ["DONOR", "FACILITY_USER", "ADMIN"]
+      },
+      "isActive": {
+        "type": "boolean"
+      }
+    },
+    "required": ["id", "role", "isActive"],
+    "additionalProperties": false
+  },
+  "PermissionsInput": {
+    "type": "object",
+    "properties": {
+      "permissions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VERIFY_DONORS",
+            "CREATE_BLOOD_REQUESTS",
+            "MANAGE_BLOOD_REQUESTS",
+            "CONFIRM_DONATIONS"
+          ]
+        },
+        "uniqueItems": true,
+        "maxItems": 4
+      }
+    },
+    "required": ["permissions"],
+    "additionalProperties": false
+  },
+  "StaffPermissions": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "permissions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VERIFY_DONORS",
+            "CREATE_BLOOD_REQUESTS",
+            "MANAGE_BLOOD_REQUESTS",
+            "CONFIRM_DONATIONS"
+          ]
+        },
+        "uniqueItems": true,
+        "maxItems": 4
+      }
+    },
+    "required": ["id", "facilityId", "permissions"],
+    "additionalProperties": false
+  },
+  "AuditMetadata": {
+    "type": "object",
+    "properties": {
+      "previousStatus": {
+        "type": "string"
+      },
+      "newStatus": {
+        "type": "string"
+      },
+      "units": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 4
+      },
+      "radiusKm": {
+        "type": "number",
+        "exclusiveMinimum": true,
+        "minimum": 0,
+        "maximum": 500
+      },
+      "notificationCount": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 100
+      },
+      "isActive": {
+        "type": "boolean"
+      },
+      "permissions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "VERIFY_DONORS",
+            "CREATE_BLOOD_REQUESTS",
+            "MANAGE_BLOOD_REQUESTS",
+            "CONFIRM_DONATIONS"
+          ]
+        },
+        "uniqueItems": true,
+        "maxItems": 4
+      },
+      "reasonCode": {
+        "type": "string",
+        "enum": ["ACCOUNT_REVIEW", "SECURITY_REVIEW", "USER_REQUEST"]
+      }
+    },
+    "additionalProperties": false
+  },
+  "AuditLog": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "actor": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "actorRole": {
+        "type": "string",
+        "enum": ["DONOR", "FACILITY_USER", "ADMIN"]
+      },
+      "action": {
+        "type": "string",
+        "enum": [
+          "FACILITY_CREATED",
+          "FACILITY_APPROVED",
+          "FACILITY_REJECTED",
+          "FACILITY_SUSPENDED",
+          "FACILITY_REACTIVATED",
+          "FACILITY_LOCATION_CHANGED",
+          "STAFF_PROVISIONED",
+          "STAFF_PERMISSIONS_CHANGED",
+          "DONOR_VERIFIED",
+          "DONOR_VERIFICATION_CHANGED",
+          "REQUEST_CREATED",
+          "REQUEST_CANCELLED",
+          "BROADCAST_INITIATED",
+          "DONOR_RESPONDED",
+          "DONATION_CONFIRMED",
+          "ACCOUNT_STATUS_CHANGED",
+          "ADMIN_BOOTSTRAPPED"
+        ]
+      },
+      "targetType": {
+        "type": "string",
+        "enum": [
+          "Facility",
+          "User",
+          "BloodRequest",
+          "Donation",
+          "DonorResponse"
+        ]
+      },
+      "targetId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "facilityId": {
+        "type": "string",
+        "pattern": "^[a-fA-F0-9]{24}$",
+        "example": "0123456789abcdef01234567"
+      },
+      "timestamp": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "metadata": {
+        "$ref": "#/components/schemas/AuditMetadata"
+      }
+    },
+    "required": [
+      "id",
+      "actor",
+      "actorRole",
+      "action",
+      "targetType",
+      "targetId",
+      "timestamp",
+      "metadata"
+    ],
+    "additionalProperties": false
+  },
+  "Stats": {
+    "type": "object",
+    "properties": {
+      "donors": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "verifiedDonors": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "availableDonors": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "approvedFacilities": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "openRequests": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "fulfilledRequests": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "confirmedDonations": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": [
+      "donors",
+      "verifiedDonors",
+      "availableDonors",
+      "approvedFacilities",
+      "openRequests",
+      "fulfilledRequests",
+      "confirmedDonations"
+    ],
+    "additionalProperties": false
+  },
+  "Pagination": {
+    "type": "object",
+    "properties": {
+      "page": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100000
+      },
+      "limit": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 100
+      },
+      "total": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "pages": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "required": ["page", "limit", "total", "pages"],
+    "additionalProperties": false
+  },
+  "Empty": {
+    "type": "object",
+    "properties": {},
+    "additionalProperties": false
+  }
+}

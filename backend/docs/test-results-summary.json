@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-30",
+  "total": 638,
+  "passed": 638,
+  "failed": 0,
+  "pending": 0,
+  "files": 13,
+  "durationSeconds": 195.05,
+  "originalTestHelperFiles": 8,
+  "changedOrDeletedOriginals": [],
+  "lint": "passed, exit 0",
+  "openapi": "passed, exit 0",
+  "dependencyVulnerabilities": 0,
+  "filesBreakdown": [
+    {
+      "file": "auth.test.js",
+      "tests": 39,
+      "status": "passed"
+    },
+    {
+      "file": "compatibility.test.js",
+      "tests": 91,
+      "status": "passed"
+    },
+    {
+      "file": "locationState.test.js",
+      "tests": 51,
+      "status": "passed"
+    },
+    {
+      "file": "matching.test.js",
+      "tests": 63,
+      "status": "passed"
+    },
+    {
+      "file": "matchingConfig.test.js",
+      "tests": 66,
+      "status": "passed"
+    },
+    {
+      "file": "openapi.test.js",
+      "tests": 5,
+      "status": "passed"
+    },
+    {
+      "file": "phase2.test.js",
+      "tests": 91,
+      "status": "passed"
+    },
+    {
+      "file": "phase3.test.js",
+      "tests": 94,
+      "status": "passed"
+    },
+    {
+      "file": "phase5.test.js",
+      "tests": 34,
+      "status": "passed"
+    },
+    {
+      "file": "phase6.test.js",
+      "tests": 30,
+      "status": "passed"
+    },
+    {
+      "file": "phase7.test.js",
+      "tests": 29,
+      "status": "passed"
+    },
+    {
+      "file": "phase8.test.js",
+      "tests": 13,
+      "status": "passed"
+    },
+    {
+      "file": "phase9.test.js",
+      "tests": 32,
+      "status": "passed"
+    }
+  ]
+}

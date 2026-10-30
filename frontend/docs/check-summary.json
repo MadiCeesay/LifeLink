@@ -1,0 +1,24 @@
+{
+  "tests": 38,
+  "passed": 38,
+  "failed": 0,
+  "pending": 0,
+  "files": 7,
+  "types": "passed",
+  "lint": "passed, 0 warnings",
+  "sdkDependencyCompatibility": "passed",
+  "androidExport": "passed",
+  "webExport": "passed",
+  "expoDevelopmentHttpStatus": 200,
+  "visualDeviceVerification": "not executed; browser surface unavailable",
+  "dependencyVulnerabilities": {
+    "info": 0,
+    "low": 5,
+    "moderate": 0,
+    "high": 3,
+    "critical": 0,
+    "total": 8
+  },
+  "iosExport": "passed",
+  "allPlatformExport": "passed; dist-final"
+}

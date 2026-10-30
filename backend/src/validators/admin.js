@@ -1,0 +1,10 @@
+import { z } from 'zod';
+import { AUDIT_ACTIONS, STAFF_PERMISSIONS, FACILITY_STATUSES, VERIFICATION_STATUSES, REQUEST_STATUSES, DONOR_RESPONSE_STATUSES } from '../config/domain.js';
+import { objectId, paginationShape } from './facility.js';
+const statuses = [...new Set([...FACILITY_STATUSES, ...VERIFICATION_STATUSES, ...REQUEST_STATUSES, ...DONOR_RESPONSE_STATUSES])];
+export const safeAuditMetadataSchema = z.object({ reasonCode: z.enum(['ACCOUNT_REVIEW', 'SECURITY_REVIEW', 'USER_REQUEST']).optional(), previousStatus: z.enum(statuses).optional(), newStatus: z.enum(statuses).optional(), units: z.number().int().min(1).max(4).optional(), radiusKm: z.number().positive().max(500).optional(), notificationCount: z.number().int().min(0).max(100).optional(), isActive: z.boolean().optional(), permissions: z.array(z.enum(STAFF_PERMISSIONS)).max(STAFF_PERMISSIONS.length).optional() }).strict();
+export const accountParams = z.object({ userId: objectId }).strict();
+export const staffPermissionParams = z.object({ facilityId: objectId, userId: objectId }).strict();
+export const accountStatusSchema = z.object({ isActive: z.boolean(), reasonCode: z.enum(['ACCOUNT_REVIEW', 'SECURITY_REVIEW', 'USER_REQUEST']) }).strict();
+export const staffPermissionsSchema = z.object({ permissions: z.array(z.enum(STAFF_PERMISSIONS)).max(STAFF_PERMISSIONS.length).refine(v => new Set(v).size === v.length, 'Duplicate permissions') }).strict();
+export const auditQuerySchema = z.object({ ...paginationShape, actor: objectId.optional(), action: z.enum(AUDIT_ACTIONS).optional(), targetId: objectId.optional(), facilityId: objectId.optional() }).strict();

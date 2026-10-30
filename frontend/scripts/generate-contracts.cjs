@@ -1,0 +1,5 @@
+const fs=require('fs');
+const spec=JSON.parse(fs.readFileSync('../backend/docs/openapi.json','utf8'));
+function ts(v){let type;if(v.$ref)type=v.$ref.split('/').pop();else if(v.enum)type=v.enum.map(x=>JSON.stringify(x)).join('|');else if(v.type==='array')type='('+ts(v.items)+')[]';else if(v.type==='object'||v.properties){const entries=Object.entries(v.properties||{});type=entries.length?'{'+entries.map(([key,value])=>JSON.stringify(key)+(v.required?.includes(key)?'':'?')+':'+ts(value)).join(';')+'}':v.additionalProperties?'Record<string,unknown>':'Record<string,never>';}else type=({integer:'number',number:'number',boolean:'boolean',string:'string'})[v.type]||'unknown';return v.nullable?'('+type+'|null)':type;}
+fs.writeFileSync('src/types/api.ts','// Generated from backend/docs/openapi.json. Do not edit by hand.\n'+Object.entries(spec.components.schemas).map(([name,value])=>'export type '+name+'='+ts(value)+';').join('\n'));
+fs.writeFileSync('src/constants/contracts.json',JSON.stringify(spec.components.schemas,null,2));
