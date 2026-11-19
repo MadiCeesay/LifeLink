@@ -19,7 +19,7 @@ export type Login = { email: string; password: string };
 export type User = {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   phone: string;
   role: "DONOR" | "FACILITY_USER" | "ADMIN";
   isActive: boolean;
@@ -206,7 +206,13 @@ export type Notification = {
     urgency: "CRITICAL" | "URGENT" | "PLANNED";
     status: "OPEN" | "PARTIALLY_FILLED" | "FULFILLED" | "EXPIRED" | "CANCELLED";
     expiresAt: string;
-    facility: { id: string; name: string; address: string } | null;
+    facility: {
+      id: string;
+      name: string;
+      address: string;
+      phone?: string | null;
+      coordinates?: number[] | null;
+    } | null;
     actionable: boolean;
   } | null;
 };

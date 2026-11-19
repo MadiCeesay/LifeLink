@@ -24,3 +24,15 @@ services:
         generateValue: true
       - key: CORS_ORIGINS
         sync: false # e.g. https://lifelink-gm.vercel.app (no trailing slash)
+      - key: APP_URL
+        sync: false # same Vercel URL, used in alert links
+      - key: VAPID_PUBLIC_KEY
+        sync: false # npx web-push generate-vapid-keys
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      - key: VAPID_SUBJECT
+        value: mailto:lifelink@utg.edu.gm
+      - key: AUTO_ESCALATE_MINUTES
+        value: "10"
+      - key: SMS_PROVIDER
+        value: none # set to twilio + TWILIO_* keys to enable SMS sign-in codes

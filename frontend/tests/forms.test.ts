@@ -70,3 +70,23 @@ describe("operational forms", () => {
       }).success,
     ).toBe(false));
 });
+describe("phone entry", async () => {
+  const { fullPhone } = await import("./phone-helper");
+  it("adds +220 to local Gambian numbers", () => {
+    expect(fullPhone("7001234")).toBe("+2207001234");
+    expect(fullPhone("700 1234")).toBe("+2207001234");
+  });
+  it("keeps numbers that already have a country code", () => {
+    expect(fullPhone("+221 77 123 4567")).toBe("+221 77 123 4567");
+    expect(fullPhone("2207001234")).toBe("2207001234");
+  });
+});
+describe("donor QR codes", async () => {
+  const { qrValue, parseDonorCode } = await import("../src/utils/qr");
+  const id = "65a1b2c3d4e5f60718293a4b";
+  it("round-trips the donor id", () => expect(parseDonorCode(qrValue(id))).toBe(id));
+  it("accepts a pasted id and rejects other codes", () => {
+    expect(parseDonorCode(" " + id.toUpperCase() + " ")).toBe(id);
+    expect(parseDonorCode("https://example.com")).toBeNull();
+  });
+});

@@ -4,6 +4,7 @@ import { parseEnv } from './config/env.js';
 import { connectDatabase, disconnectDatabase } from './config/database.js';
 import { createApp } from './app.js';
 import { initializeDatabase } from './config/initializeDatabase.js';
+import { startEscalationLoop } from './services/escalationService.js';
 export async function startServer(config) {
   await connectDatabase(config.MONGODB_URI);
   let server;
@@ -14,8 +15,10 @@ export async function startServer(config) {
       listener.once('error', reject);
     });
   } catch (error) { await disconnectDatabase(); throw error; }
+  const stopEscalation = config.NODE_ENV === 'test' ? () => {} : startEscalationLoop(config);
   let stopping;
   const stop = () => stopping ??= (async () => {
+    stopEscalation();
     const deadline = setTimeout(() => { server.closeAllConnections(); }, 10000);
     deadline.unref();
     try { await new Promise((resolve, reject) => server.close(error => error ? reject(error) : resolve())); }

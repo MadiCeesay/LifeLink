@@ -9,6 +9,7 @@ import React, {
 import { AppState } from "react-native";
 import { send, setToken, onUnauthorized } from "../services/client";
 import { tokenStorage } from "../services/storage";
+import { disablePush } from "../services/push";
 import { queryClient } from "./query";
 import { establishSession, clearSession } from "../services/session";
 import type { User, Session } from "../types/api";
@@ -17,6 +18,7 @@ type Auth = {
   loading: boolean;
   error: string | null;
   authenticate: (kind: "login" | "register", body: unknown) => Promise<void>;
+  adopt: (session: Session) => Promise<void>;
   logout: () => Promise<void>;
   restore: () => Promise<void>;
 };
@@ -28,6 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const generation = useRef(0);
   const logout = useCallback(async () => {
     generation.current++;
+    // Stop alerts for this account on this device before the session is removed.
+    await disablePush().catch(() => {});
     setToken(null);
     setUser(null);
     setError(null);
@@ -83,11 +87,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       onUnauthorized(() => {});
     };
   }, [logout, restore]);
-  const authenticate = async (kind: "login" | "register", body: unknown) => {
+  const authenticate = (kind: "login" | "register", body: unknown) =>
+    start(kind, body, (k, b) => send<Session>("post", "/auth/" + k, b));
+  // Used by the SMS-code flow, where the server already returned a session.
+  const adopt = (session: Session) => start("login", null, async () => session);
+  const start = async (
+    kind: "login" | "register",
+    body: unknown,
+    obtain: (k: "login" | "register", b: unknown) => Promise<Session>,
+  ) => {
     const g = ++generation.current;
     setUser(null);
     const identity = await establishSession(kind, body, {
-      authenticate: (k, b) => send<Session>("post", "/auth/" + k, b),
+      authenticate: obtain,
       identify: () => send<{ user: User }>("get", "/auth/me"),
       write: tokenStorage.write,
       erase: tokenStorage.clear,
@@ -104,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
   return (
     <Context.Provider
-      value={{ user, loading, error, authenticate, logout, restore }}
+      value={{ user, loading, error, authenticate, adopt, logout, restore }}
     >
       {children}
     </Context.Provider>

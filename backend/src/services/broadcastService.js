@@ -11,6 +11,9 @@ import { AppError } from '../utils/errors.js';
 import { broadcastView } from '../utils/notificationViews.js';
 import { notificationProvider } from './notificationProviders.js';
 import { requireActiveDonor, isCurrentCandidate } from './candidateEligibilityService.js';
+import { Facility } from '../models/Facility.js';
+import { pushToUsers } from './pushService.js';
+import { requestAlertMessage } from '../utils/pushMessages.js';
 export async function broadcastRequest(actorId, requestId, input, config) {
   const data = parseInput(broadcastSchema, input);
   const request = await ownedRequest(actorId, requestId, { permission: 'MANAGE_BLOOD_REQUESTS' });
@@ -23,7 +26,9 @@ export async function broadcastRequest(actorId, requestId, input, config) {
   if (next >= config.MATCH_RADIUS_STAGES_KM.length) throw new AppError(409, 'RADIUS_EXHAUSTED', 'Maximum configured radius has been reached');
   if (config.MATCH_RADIUS_STAGES_KM[next] < request.broadcastRadiusKm) throw new AppError(409, 'RADIUS_POLICY_CHANGED', 'Radius configuration needs administrative review');
   const result = await createMatchingService({ ...config, MATCH_RADIUS_STAGES_KM: config.MATCH_RADIUS_STAGES_KM.slice(0, next + 1) }).findCandidatesProgressively({ recipientBloodType: request.patientBloodType, requestLocation: request.requestLocation.toObject(), desiredCandidates: Math.min(data.desiredCandidates, 1000 - excludedDonorIds.length), excludedDonorIds });
-  return mongoose.connection.transaction(async session => {
+  let delivered = [];
+  const view = await mongoose.connection.transaction(async session => {
+    delivered = [];
     const current = await ownedRequest(actorId, requestId, { session, permission: 'MANAGE_BLOOD_REQUESTS', lock: true });
     assertRequestActive(current);
     const existing = await Broadcast.findOne({ bloodRequest: current._id, idempotencyKey: data.idempotencyKey }).session(session);
@@ -37,7 +42,8 @@ export async function broadcastRequest(actorId, requestId, input, config) {
       try { donor = await requireActiveDonor(candidate.donorId, session, { lock: true, location: true }); }
       catch (error) { if (error.code === 'DONOR_ACCESS_DENIED') continue; throw error; }
       if (!isCurrentCandidate(donor, current, config, result.radiusUsedKm)) continue;
-      await notificationProvider('IN_APP').publish({ recipient: donor._id, bloodRequest: current._id, radiusKm: result.radiusUsedKm }, session);
+      const notification = await notificationProvider('IN_APP').publish({ recipient: donor._id, bloodRequest: current._id, radiusKm: result.radiusUsedKm }, session);
+      delivered.push({ userId: donor._id, notificationId: notification._id });
       notifiedCount++;
     }
     current.broadcastRadiusKm = Math.max(current.broadcastRadiusKm, result.radiusUsedKm);
@@ -47,4 +53,9 @@ export async function broadcastRequest(actorId, requestId, input, config) {
     await recordAudit(session, actorId, 'BROADCAST_INITIATED', 'BloodRequest', current._id, current.requestingFacility, { radiusKm: current.broadcastRadiusKm, notificationCount: notifiedCount });
     return broadcastView(broadcast);
   });
+  if (delivered.length) {
+    const facility = await Facility.findById(request.requestingFacility).select('name');
+    void pushToUsers(config, delivered.map(d => requestAlertMessage(config, request, facility, d))).catch(() => {});
+  }
+  return view;
 }

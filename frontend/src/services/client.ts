@@ -40,11 +40,15 @@ export function normalizeError(error: unknown): ApiError {
       429: "Too many attempts. Please wait before trying again.",
       503: "The service is temporarily unavailable. Please try again shortly.",
     };
+    // Prefer the server's own wording for user-fixable problems (wrong code, phone in use, cooldowns).
+    const serverWording =
+      [400, 404, 409, 429, 502, 503].includes(status) ||
+      (status === 401 && !token)
+        ? body?.message
+        : undefined;
     return new ApiError(
-      messages[status] ??
-        (status === 400 || status === 409 || status === 404
-          ? body?.message
-          : undefined) ??
+      serverWording ??
+        messages[status] ??
         (error.code === "ECONNABORTED"
           ? "The request timed out. Check your connection and retry."
           : "We could not reach LifeLink. Check your connection and retry."),

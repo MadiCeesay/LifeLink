@@ -1,59 +1,43 @@
 import React from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { router } from "expo-router";
 import { useResource } from "../../hooks/api";
-import type { Facility } from "../../types/api";
-import {
-  Badge,
-  Button,
-  Card,
-  ErrorState,
-  Loading,
-  Screen,
-  styles,
-} from "../../components/ui";
-export default function Home() {
-  const q = useResource<Facility>("/facilities/me");
+import type { BloodRequest, Facility, Pagination } from "../../types/api";
+import { BigButton, Body, Box, H3, Notice, Page, errorText, font } from "../../components/kit";
+import { PushBanner } from "../../features/common/PushBanner";
+import { RequestTile } from "../../features/facility/RequestTile";
+import { colors as c } from "../../theme";
+import { isActiveRequest } from "../../utils/domain";
+export default function FacilityHome() {
+  const facility = useResource<Facility>("/facilities/me");
+  const list = useResource<{ requests: BloodRequest[]; pagination: Pagination }>("/requests", { page: 1, limit: 30 });
+  const active = (list.data?.requests ?? []).filter(isActiveRequest);
   return (
-    <Screen
-      title="LifeLink Facility"
-      onRefresh={() => void q.refetch()}
-      refreshing={q.isFetching}
+    <Page
+      refreshing={list.isFetching}
+      onRefresh={() => {
+        void list.refetch();
+        void facility.refetch();
+      }}
     >
-      {q.isPending ? (
-        <Loading />
-      ) : q.error ? (
-        <ErrorState error={q.error} retry={() => void q.refetch()} />
+      <View style={{ gap: 2 }}>
+        <Text style={{ fontFamily: font.regular, fontSize: 15, color: c.muted }}>{facility.data?.name ?? "Your facility"}</Text>
+        <Text accessibilityRole="header" style={{ fontFamily: font.bold, fontSize: 26, color: c.text }}>Blood requests</Text>
+      </View>
+      <BigButton title="New blood request" icon="add" onPress={() => router.push("/facility/create-request")} />
+      <PushBanner who="staff" />
+      {list.error ? <Notice text={errorText(list.error)} tone="error" /> : null}
+      <H3>Active now</H3>
+      {list.isPending ? (
+        <Body muted>Loading…</Body>
+      ) : active.length === 0 ? (
+        <Box>
+          <Body muted>No active requests. Tap “New blood request” when a patient needs blood.</Body>
+        </Box>
       ) : (
-        <Card>
-          <Text style={styles.h2}>{q.data?.name}</Text>
-          <Badge value={q.data!.verificationStatus} />
-          <Text style={styles.body}>{q.data?.address}</Text>
-          <Text style={styles.muted}>{q.data?.phone}</Text>
-        </Card>
+        active.map((r) => <RequestTile key={r.id} request={r} />)
       )}
-      <Button
-        title="View facility requests"
-        onPress={() => router.push("/(facility)/requests")}
-      />
-      <Button
-        title="Create blood request"
-        variant="secondary"
-        onPress={() => router.push("/facility/create-request")}
-      />
-      <Button
-        title="Verify a donor"
-        variant="secondary"
-        onPress={() => router.push("/(facility)/verify")}
-      />
-      <Card>
-        <Text style={styles.h3}>Controlled coordination</Text>
-        <Text style={styles.muted}>
-          Requests use your facility’s official stored location. Donor matching
-          stays private. Actions require the corresponding staff permission; the
-          server checks each operation.
-        </Text>
-      </Card>
-    </Screen>
+      <BigButton title="See all requests" variant="ghost" size="medium" onPress={() => router.push("/(facility)/requests")} />
+    </Page>
   );
 }

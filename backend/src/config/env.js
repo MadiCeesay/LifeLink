@@ -1,15 +1,28 @@
 import { z } from 'zod';
 import { radiusStagesEnvSchema } from '../validators/matching.js';
+const blankToUndefined = v => (typeof v === 'string' && v.trim() === '' ? undefined : v);
+const optionalText = () => z.preprocess(blankToUndefined, z.string().trim().optional());
 const schema = z.object({
   MATCH_RADIUS_STAGES_KM: radiusStagesEnvSchema,
   BLOOD_REQUEST_MAX_LIFETIME_HOURS: z.coerce.number().int().min(1).max(720).default(72),
   DONATION_MATCHING_PAUSE_DAYS: z.coerce.number().int().min(1).max(365).default(56),
   BROADCAST_RATE_LIMIT: z.coerce.number().int().min(1).max(1000).default(20),
+  SMS_PROVIDER: z.enum(['none', 'console', 'twilio']).default('none'),
+  TWILIO_ACCOUNT_SID: optionalText(),
+  TWILIO_AUTH_TOKEN: optionalText(),
+  TWILIO_FROM: optionalText(),
+  VAPID_PUBLIC_KEY: optionalText(),
+  VAPID_PRIVATE_KEY: optionalText(),
+  VAPID_SUBJECT: z.string().trim().default('mailto:lifelink@example.org'),
+  // Public app URL used in push notification links (e.g. https://lifelink-gm.vercel.app).
+  APP_URL: z.preprocess(blankToUndefined, z.string().trim().url().optional()),
+  // Minutes without enough donors before the search widens automatically. 0 disables it.
+  AUTO_ESCALATE_MINUTES: z.coerce.number().int().min(0).max(1440).default(10),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DONOR_LOCATION_MAX_AGE_MINUTES: z.coerce.number().int().min(1).max(10080).default(60),
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
   // Interface to bind. Defaults to 0.0.0.0 in production (required by Render and other hosts), loopback otherwise.
-  HOST: z.preprocess(v => (typeof v === 'string' && v.trim() === '' ? undefined : v), z.string().trim().min(1).optional()),
+  HOST: z.preprocess(blankToUndefined, z.string().trim().min(1).optional()),
   // Number of reverse proxies in front of the API (Render = 1). Needed so rate limits see real client IPs.
   TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
   MONGODB_URI: z.string().regex(/^mongodb(?:\+srv)?:\/\/\S+$/),

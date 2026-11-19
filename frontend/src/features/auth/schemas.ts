@@ -1,18 +1,21 @@
 import { z } from "zod";
+// Mirrors backend validators/auth.js: donors sign up with phone; email is optional.
 const password = z
   .string()
-  .min(12, "Use at least 12 characters.")
+  .min(8, "Use at least 8 characters.")
   .max(72)
   .refine(
     (v) => new TextEncoder().encode(v).length <= 72,
     "Use at most 72 UTF-8 bytes.",
   );
 export const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email.").max(254),
+  phone: z.string().trim().min(7).max(30).optional(),
+  email: z.string().trim().email("Enter a valid email.").max(254).optional(),
   password: z.string().min(1, "Enter your password.").max(72),
 });
-export const registrationSchema = loginSchema.extend({
+export const registrationSchema = z.object({
   name: z.string().trim().min(2).max(100),
+  email: z.string().trim().email("Enter a valid email.").max(254).optional(),
   phone: z
     .string()
     .trim()

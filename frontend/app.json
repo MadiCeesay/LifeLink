@@ -49,6 +49,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#F8F8F7"
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "LifeLink uses the camera to scan donor cards at the hospital.",
+          "recordAudioAndroid": false
+        }
       ]
     ],
     "experiments": {

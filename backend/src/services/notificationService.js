@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { Notification } from '../models/Notification.js';
 import { DonorResponse } from '../models/DonorResponse.js';
 import { BloodRequest } from '../models/BloodRequest.js';
+import { Broadcast } from '../models/Broadcast.js';
 import { User } from '../models/User.js';
 import { parseInput } from '../utils/parseInput.js';
 import { AppError } from '../utils/errors.js';
@@ -13,7 +14,9 @@ import { notificationView, responseView } from '../utils/notificationViews.js';
 import { assertRequestActive, effectiveRequestStatus, ACTIVE_REQUEST_STATUSES } from '../utils/requestState.js';
 import { ownedRequest, requestFacilityActive } from './requestService.js';
 import { requireActiveDonor, isCurrentCandidate } from './candidateEligibilityService.js';
-const populateRequest = { path: 'bloodRequest', select: 'requestingFacility patientBloodType unitsNeeded unitsReceived urgency status expiresAt', populate: { path: 'requestingFacility', select: 'name address isActive verificationStatus' } };
+import { pushToUsers } from './pushService.js';
+import { donorComingMessage } from '../utils/pushMessages.js';
+const populateRequest = { path: 'bloodRequest', select: 'requestingFacility patientBloodType unitsNeeded unitsReceived urgency status expiresAt', populate: { path: 'requestingFacility', select: 'name address phone location isActive verificationStatus' } };
 export async function listNotifications(actorId, input) {
   await requireActiveDonor(actorId);
   const { page, limit, unread } = parseInput(notificationQuerySchema, input);
@@ -34,7 +37,9 @@ export async function markNotificationRead(actorId, notificationId) {
 }
 export async function respondToNotification(actorId, notificationId, input, config) {
   parseInput(objectId, notificationId); const data = parseInput(responseSchema, input);
-  return mongoose.connection.transaction(async session => {
+  let accepted = null;
+  const view = await mongoose.connection.transaction(async session => {
+    accepted = null;
     let donor = await requireActiveDonor(actorId, session, { lock: true, location: true });
     const notification = await Notification.findOne({ _id: notificationId, recipient: actorId }).session(session);
     if (!notification) throw new AppError(404, 'NOTIFICATION_NOT_FOUND', 'Notification not found');
@@ -55,8 +60,35 @@ export async function respondToNotification(actorId, notificationId, input, conf
     }
     const [response] = await DonorResponse.create([{ donor: actorId, bloodRequest: request._id, notification: notification._id, status: data.status }], { session });
     await recordAudit(session, actorId, 'DONOR_RESPONDED', 'DonorResponse', response._id, request.requestingFacility, { newStatus: data.status });
+    if (data.status === 'ACCEPTED') accepted = { request, donor };
     return responseView(response);
   });
+  if (accepted) void notifyStaffOfAcceptance(accepted.request, accepted.donor, config).catch(() => {});
+  return view;
+}
+async function notifyStaffOfAcceptance(request, donor, config) {
+  const staff = await User.find({ role: 'FACILITY_USER', isActive: true, facility: request.requestingFacility, facilityPermissions: 'MANAGE_BLOOD_REQUESTS' }).select('_id').limit(50);
+  const ids = new Set([request.createdBy.toString(), ...staff.map(u => u.id)]);
+  await pushToUsers(config, [...ids].map(id => donorComingMessage(config, request, donor, id)));
+}
+// Live counts for the hospital's request screen: who was alerted, who is coming, who declined.
+export async function requestSummary(actorId, requestId, config) {
+  const request = await ownedRequest(actorId, requestId, { adminAllowed: true });
+  const [alerted, responses] = await Promise.all([
+    Notification.countDocuments({ bloodRequest: request._id }),
+    DonorResponse.aggregate([{ $match: { bloodRequest: request._id } }, { $group: { _id: '$status', n: { $sum: 1 } } }]),
+  ]);
+  const by = Object.fromEntries(responses.map(r => [r._id, r.n]));
+  const last = await Broadcast.findOne({ bloodRequest: request._id }).sort({ createdAt: -1 }).select('createdAt');
+  const stages = config.MATCH_RADIUS_STAGES_KM;
+  const canWiden = config.AUTO_ESCALATE_MINUTES > 0 && last && request.broadcastStage < stages.length - 1 && ACTIVE_REQUEST_STATUSES.includes(effectiveRequestStatus(request));
+  return {
+    alerted, accepted: by.ACCEPTED ?? 0, declined: by.DECLINED ?? 0,
+    unitsNeeded: request.unitsNeeded, unitsReceived: request.unitsReceived,
+    radiusStagesKm: stages, broadcastRadiusKm: request.broadcastRadiusKm, broadcastStage: request.broadcastStage,
+    lastBroadcastAt: last?.createdAt ?? null,
+    nextWidenAt: canWiden ? new Date(last.createdAt.getTime() + config.AUTO_ESCALATE_MINUTES * 60000) : null,
+  };
 }
 export async function listRequestResponses(actorId, requestId, input) {
   const request = await ownedRequest(actorId, requestId, { permission: 'MANAGE_BLOOD_REQUESTS' });

@@ -10,6 +10,7 @@ import { authRoutes } from './routes/authRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 import { donorRoutes } from './routes/donorRoutes.js';
 import { facilityRoutes } from './routes/facilityRoutes.js';
+import { pushRoutes } from './routes/pushRoutes.js';
 import { notFound, errorHandler } from './middleware/errorHandler.js';
 import { AppError } from './utils/errors.js';
 export function createApp(config, { authLimit = 20, apiLimit = 200 } = {}) {
@@ -38,6 +39,7 @@ export function createApp(config, { authLimit = 20, apiLimit = 200 } = {}) {
   app.use('/api/v1/donors', donorRoutes(config));
   app.use('/api/v1/requests', requestRoutes(config));
   app.use('/api/v1/notifications', notificationRoutes(config));
+  app.use('/api/v1/push', pushRoutes(config));
   app.use(notFound);
   app.use(errorHandler);
   return app;

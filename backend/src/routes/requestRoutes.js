@@ -18,6 +18,7 @@ export function requestRoutes(config) {
   const broadcastLimit = broadcastLimiter(config);
   router.post('/:requestId/broadcast', authorize('FACILITY_USER'), broadcastLimit, validate(requestParams, 'params'), validate(broadcastSchema), notification.broadcast);
   router.get('/:requestId/responses', authorize('FACILITY_USER'), validate(requestParams, 'params'), validate(historyQuerySchema, 'query'), notification.responses);
+  router.get('/:requestId/summary', authorize('FACILITY_USER', 'ADMIN'), validate(requestParams, 'params'), notification.summary);
   router.post('/', authorize('FACILITY_USER'), validate(requestCreateSchema), controller.create);
   router.get('/', authorize('FACILITY_USER', 'ADMIN'), validate(requestQuerySchema, 'query'), controller.list);
   router.get('/:requestId', authorize('FACILITY_USER', 'ADMIN'), validate(requestParams, 'params'), controller.get);
