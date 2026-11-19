@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { AppState, Platform } from "react-native";
-import { Stack, router } from "expo-router";
-import * as Notifications from "expo-notifications";
+import { Stack } from "expo-router";
+import { AlertTaps } from "../features/common/AlertTaps";
 import { StatusBar } from "expo-status-bar";
 import { QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -12,19 +12,8 @@ import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { queryClient } from "../providers/query";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
 import { Button, ErrorState, Loading, Screen } from "../components/ui";
-// Opens the right screen when someone taps an alert in the store app.
-function useAlertTaps(signedIn: boolean) {
-  const last = Notifications.useLastNotificationResponse();
-  useEffect(() => {
-    if (Platform.OS === "web" || !signedIn || !last) return;
-    const path = last.notification.request.content.data?.path;
-    if (typeof path === "string" && path.startsWith("/")) router.push(path as never);
-    void Notifications.clearLastNotificationResponseAsync();
-  }, [last, signedIn]);
-}
 function Routes() {
   const a = useAuth();
-  useAlertTaps(!!a.user);
   if (a.loading) return <Loading />;
   if (a.error && !a.user)
     return (
@@ -38,24 +27,27 @@ function Routes() {
       </Screen>
     );
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Protected guard={!a.user}>
-        <Stack.Screen name="(auth)" />
-      </Stack.Protected>
-      <Stack.Protected guard={a.user?.role === "DONOR"}>
-        <Stack.Screen name="(donor)" />
-        <Stack.Screen name="donor" />
-      </Stack.Protected>
-      <Stack.Protected guard={a.user?.role === "FACILITY_USER"}>
-        <Stack.Screen name="(facility)" />
-        <Stack.Screen name="facility" />
-      </Stack.Protected>
-      <Stack.Protected guard={a.user?.role === "ADMIN"}>
-        <Stack.Screen name="(admin)" />
-        <Stack.Screen name="admin" />
-      </Stack.Protected>
-    </Stack>
+    <>
+      {Platform.OS !== "web" && a.user ? <AlertTaps /> : null}
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Protected guard={!a.user}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Protected guard={a.user?.role === "DONOR"}>
+          <Stack.Screen name="(donor)" />
+          <Stack.Screen name="donor" />
+        </Stack.Protected>
+        <Stack.Protected guard={a.user?.role === "FACILITY_USER"}>
+          <Stack.Screen name="(facility)" />
+          <Stack.Screen name="facility" />
+        </Stack.Protected>
+        <Stack.Protected guard={a.user?.role === "ADMIN"}>
+          <Stack.Screen name="(admin)" />
+          <Stack.Screen name="admin" />
+        </Stack.Protected>
+      </Stack>
+    </>
   );
 }
 export default function Layout() {
