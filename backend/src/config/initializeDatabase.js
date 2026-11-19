@@ -11,8 +11,17 @@ import { VerificationEvent } from '../models/VerificationEvent.js';
 import { AdminBootstrap } from '../models/AdminBootstrap.js';
 import { OtpCode } from '../models/OtpCode.js';
 import { PushSubscription } from '../models/PushSubscription.js';
+// Older versions required an email on every account (non-sparse unique index). Phone-only donors
+// need a sparse index, so replace the old one once if it is still there.
+async function migrateEmailIndex() {
+  const users = mongoose.connection.db.collection('users');
+  const indexes = await users.indexes().catch(() => []);
+  const old = indexes.find(i => i.name === 'email_1' && !i.sparse);
+  if (old) await users.dropIndex('email_1');
+}
 export async function initializeDatabase() {
   const hello = await mongoose.connection.db.admin().command({ hello: 1 });
   if (!hello.setName && hello.msg !== 'isdbgrid') throw new Error('Phase 2 requires MongoDB transactions: use a replica set or sharded cluster');
+  await migrateEmailIndex();
   await Promise.all([User.init(), Facility.init(), VerificationEvent.init(), AdminBootstrap.init(), BloodRequest.init(), Notification.init(), Broadcast.init(), DonorResponse.init(), Donation.init(), AuditLog.init(), OtpCode.init(), PushSubscription.init()]);
 }
