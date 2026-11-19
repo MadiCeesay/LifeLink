@@ -10,7 +10,8 @@
       "bundleIdentifier": "gm.lifelink.mobile",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "buildNumber": "1"
     },
     "android": {
       "package": "gm.lifelink.mobile",
@@ -24,7 +25,8 @@
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
-      }
+      },
+      "versionCode": 1
     },
     "web": {
       "bundler": "metro",
@@ -75,6 +77,12 @@
       "typedRoutes": false
     },
     "icon": "./assets/icon.png",
-    "primaryColor": "#A61B2B"
+    "primaryColor": "#A61B2B",
+    "owner": "madiceesays-team",
+    "extra": {
+      "eas": {
+        "projectId": "44e40ea9-b74d-496c-a3aa-857feebff760"
+      }
+    }
   }
 }
