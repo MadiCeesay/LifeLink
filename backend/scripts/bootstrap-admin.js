@@ -34,6 +34,6 @@ async function run() {
   } finally { await disconnectDatabase(); }
 }
 run().catch(error => {
-  console.error(error.code === 'VALIDATION_ERROR' ? 'Invalid account details. Check name, email, phone and password requirements.' : error.message.startsWith('Invalid environment') || String(error.code ?? '').startsWith('BOOTSTRAP') || error.message === 'Passwords do not match' || error.message === 'Run this command in an interactive terminal' ? error.message : 'Bootstrap failed. Check configuration and replica-set database availability.');
+  console.error(error.code === 'VALIDATION_ERROR' ? 'Invalid account details. Check name, email, phone and password requirements.' : error.message.startsWith('Invalid environment') || String(error.code ?? '').startsWith('BOOTSTRAP') || error.message === 'Passwords do not match' || error.message === 'Run this command in an interactive terminal' ? error.message : `Bootstrap failed (${error.name ?? 'Error'}): ${String(error.message ?? '').replace(/mongodb(\+srv)?:\/\/[^@\s]*@/g, 'mongodb://***@').slice(0, 200)}`);
   process.exitCode = 1;
 });
