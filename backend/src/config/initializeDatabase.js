@@ -23,5 +23,7 @@ export async function initializeDatabase() {
   const hello = await mongoose.connection.db.admin().command({ hello: 1 });
   if (!hello.setName && hello.msg !== 'isdbgrid') throw new Error('Phase 2 requires MongoDB transactions: use a replica set or sharded cluster');
   await migrateEmailIndex();
-  await Promise.all([User.init(), Facility.init(), VerificationEvent.init(), AdminBootstrap.init(), BloodRequest.init(), Notification.init(), Broadcast.init(), DonorResponse.init(), Donation.init(), AuditLog.init(), OtpCode.init(), PushSubscription.init()]);
+  const models = [User, Facility, VerificationEvent, AdminBootstrap, BloodRequest, Notification, Broadcast, DonorResponse, Donation, AuditLog, OtpCode, PushSubscription];
+  await Promise.all(models.map(m => m.init()));
+  await Promise.all(models.map(m => m.createIndexes()));
 }
