@@ -11,11 +11,24 @@
     },
     "android": {
       "package": "gm.lifelink.mobile",
-      "permissions": ["ACCESS_COARSE_LOCATION", "ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "favicon": "./assets/favicon.png",
+      "name": "LifeLink",
+      "shortName": "LifeLink",
+      "themeColor": "#A61B2B",
+      "backgroundColor": "#F8F8F7"
     },
     "scheme": "lifelink",
     "plugins": [
@@ -28,10 +41,20 @@
         }
       ],
       "expo-font",
-      "expo-splash-screen"
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#F8F8F7"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "icon": "./assets/icon.png",
+    "primaryColor": "#A61B2B"
   }
 }

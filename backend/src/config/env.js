@@ -8,6 +8,10 @@ const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   DONOR_LOCATION_MAX_AGE_MINUTES: z.coerce.number().int().min(1).max(10080).default(60),
   PORT: z.coerce.number().int().min(1).max(65535).default(5000),
+  // Interface to bind. Defaults to 0.0.0.0 in production (required by Render and other hosts), loopback otherwise.
+  HOST: z.preprocess(v => (typeof v === 'string' && v.trim() === '' ? undefined : v), z.string().trim().min(1).optional()),
+  // Number of reverse proxies in front of the API (Render = 1). Needed so rate limits see real client IPs.
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).default(0),
   MONGODB_URI: z.string().regex(/^mongodb(?:\+srv)?:\/\/\S+$/),
   JWT_SECRET: z.string().trim().min(32).refine(v => !/^(change|replace|your|example)/i.test(v), 'Use a randomly generated secret'),
   JWT_EXPIRES_IN: z.string().regex(/^[1-9]\d*(s|m|h|d)$/).default('1h').refine(v => {

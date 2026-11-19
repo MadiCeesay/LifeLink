@@ -1,0 +1,26 @@
+# Render Blueprint for the LifeLink API.
+# In Render: New > Blueprint > pick this repo. Fill the "sync: false" values in the dashboard.
+services:
+  - type: web
+    name: lifelink-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: TRUST_PROXY
+        value: "1"
+      - key: JWT_EXPIRES_IN
+        value: 12h
+      - key: MONGODB_URI
+        sync: false # MongoDB Atlas connection string (mongodb+srv://...)
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false # e.g. https://lifelink-gm.vercel.app (no trailing slash)

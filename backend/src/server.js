@@ -10,7 +10,7 @@ export async function startServer(config) {
   try {
     await initializeDatabase();
     server = await new Promise((resolve, reject) => {
-      const listener = createApp(config).listen(config.PORT, '127.0.0.1', () => resolve(listener));
+      const listener = createApp(config).listen(config.PORT, config.HOST ?? (config.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1'), () => resolve(listener));
       listener.once('error', reject);
     });
   } catch (error) { await disconnectDatabase(); throw error; }

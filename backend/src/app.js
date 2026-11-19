@@ -15,6 +15,7 @@ import { AppError } from './utils/errors.js';
 export function createApp(config, { authLimit = 20, apiLimit = 200 } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  if (config.TRUST_PROXY) app.set('trust proxy', config.TRUST_PROXY);
   app.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   app.use(helmet());
   app.use(cors({ origin(origin, callback) {
