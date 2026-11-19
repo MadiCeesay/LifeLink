@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { AppState } from "react-native";
-import { Stack } from "expo-router";
+import { AppState, Platform } from "react-native";
+import { Stack, router } from "expo-router";
+import * as Notifications from "expo-notifications";
 import { StatusBar } from "expo-status-bar";
 import { QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -11,8 +12,19 @@ import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { queryClient } from "../providers/query";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
 import { Button, ErrorState, Loading, Screen } from "../components/ui";
+// Opens the right screen when someone taps an alert in the store app.
+function useAlertTaps(signedIn: boolean) {
+  const last = Notifications.useLastNotificationResponse();
+  useEffect(() => {
+    if (Platform.OS === "web" || !signedIn || !last) return;
+    const path = last.notification.request.content.data?.path;
+    if (typeof path === "string" && path.startsWith("/")) router.push(path as never);
+    void Notifications.clearLastNotificationResponseAsync();
+  }, [last, signedIn]);
+}
 function Routes() {
   const a = useAuth();
+  useAlertTaps(!!a.user);
   if (a.loading) return <Loading />;
   if (a.error && !a.user)
     return (

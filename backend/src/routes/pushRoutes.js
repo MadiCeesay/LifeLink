@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { authenticate } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
-import { pushEnabled, saveSubscription, removeSubscription } from '../services/pushService.js';
+import { pushEnabled, saveSubscription, saveExpoToken, removeSubscription } from '../services/pushService.js';
 const subscriptionSchema = z.object({
   endpoint: z.string().url().max(2000).refine(v => v.startsWith('https://'), 'Push endpoint must use HTTPS'),
   expirationTime: z.number().nullable().optional(),
@@ -13,6 +13,7 @@ export function pushRoutes(config) {
   router.get('/config', (_req, res) => res.json({ success: true, data: { enabled: pushEnabled(config), publicKey: config.VAPID_PUBLIC_KEY ?? null } }));
   router.use(authenticate(config));
   router.post('/subscribe', validate(subscriptionSchema), async (req, res) => res.json({ success: true, data: await saveSubscription(req.user._id, req.body, req.get('user-agent')) }));
+  router.post('/expo', validate(z.object({ token: z.string().regex(/^(Exponent|Expo)PushToken\[[A-Za-z0-9_-]+\]$/, 'Invalid Expo push token'), platform: z.enum(['ios', 'android']).optional() })), async (req, res) => res.json({ success: true, data: await saveExpoToken(req.user._id, req.body.token, req.body.platform) }));
   router.post('/unsubscribe', validate(z.object({ endpoint: z.string().max(2000) })), async (req, res) => res.json({ success: true, data: await removeSubscription(req.user._id, req.body.endpoint) }));
   return router;
 }

@@ -9,6 +9,7 @@ export function requestAlertMessage(config, request, facility, { userId, notific
     tag: `request-${request._id}`,
     title: `${urgent ? 'URGENT: ' : ''}${display(request.patientBloodType)} blood needed`,
     body: `${facility?.name ?? 'A hospital'} needs ${units} unit${units === 1 ? '' : 's'}. Tap to respond.`,
+    path: `/donor/notification/${notificationId}`,
     url: link(config, `/donor/notification/${notificationId}`),
   };
 }
@@ -19,6 +20,7 @@ export function donorComingMessage(config, request, donor, staffId) {
     tag: `response-${request._id}`,
     title: `${donor?.name?.split(' ')[0] ?? 'A donor'} is coming`,
     body: `A donor accepted your ${display(request.patientBloodType)} request.`,
+    path: `/facility/request/${request._id}`,
     url: link(config, `/facility/request/${request._id}`),
   };
 }
