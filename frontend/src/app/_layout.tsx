@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { AppState, Platform } from "react-native";
+import { AppState, Platform, View } from "react-native";
 import { Stack } from "expo-router";
 import { AlertTaps } from "../features/common/AlertTaps";
 import { StatusBar } from "expo-status-bar";
@@ -68,7 +68,29 @@ export default function Layout() {
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <StatusBar style="dark" />
-          <Routes />
+          {/* LifeLink is a phone app: on a computer browser, show it in a centred phone-width column. */}
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: Platform.OS === "web" ? "#E7E4E0" : undefined,
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                width: "100%",
+                maxWidth: Platform.OS === "web" ? 480 : undefined,
+                overflow: "hidden",
+                backgroundColor: "#F8F8F7",
+                ...(Platform.OS === "web"
+                  ? { boxShadow: "0 0 40px rgba(0,0,0,0.12)" }
+                  : {}),
+              }}
+            >
+              <Routes />
+            </View>
+          </View>
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
