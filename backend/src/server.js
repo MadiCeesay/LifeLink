@@ -34,5 +34,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, () => {
       stop().catch(() => { console.error('Shutdown failed'); process.exitCode = 1; });
     });
-  } catch { console.error('Startup failed: check configuration and database availability'); process.exitCode = 1; }
+  } catch (error) {
+    // Say what failed without leaking secrets: config errors list field names only; credentials are masked.
+    const detail = String(error?.message ?? error).replace(/mongodb(\+srv)?:\/\/[^@\s]*@/g, 'mongodb://***@').slice(0, 300);
+    console.error(`Startup failed (${error?.name ?? 'Error'}): ${detail}`);
+    process.exitCode = 1;
+  }
 }
