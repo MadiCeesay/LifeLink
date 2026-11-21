@@ -16,9 +16,15 @@ export const setToken = (value: string | null) => {
 export const onUnauthorized = (handler: () => void) => {
   unauthorized = handler;
 };
+/** Wakes the API as soon as the app opens, so the first real request is fast. */
+export function warmUp() {
+  const base = process.env.EXPO_PUBLIC_API_URL;
+  if (base) void fetch(base.replace(/\/$/, "") + "/health").catch(() => {});
+}
 export const api = create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
-  timeout: 15000,
+  // The free API host sleeps when idle and can take ~50 s to wake, so allow for that.
+  timeout: 75000,
   headers: { "Content-Type": "application/json" },
 });
 api.interceptors.request.use((config) => {

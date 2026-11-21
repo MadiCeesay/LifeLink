@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { AppState, Platform, View } from "react-native";
 import { Stack } from "expo-router";
 import { AlertTaps } from "../features/common/AlertTaps";
+import { warmUp } from "../services/client";
 import { StatusBar } from "expo-status-bar";
 import { QueryClientProvider, focusManager } from "@tanstack/react-query";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -12,6 +13,8 @@ import { Inter_700Bold } from "@expo-google-fonts/inter/700Bold";
 import { queryClient } from "../providers/query";
 import { AuthProvider, useAuth } from "../providers/AuthProvider";
 import { Button, ErrorState, Loading, Screen } from "../components/ui";
+// Start waking the API before anything else loads.
+warmUp();
 function Routes() {
   const a = useAuth();
   if (a.loading) return <Loading />;
