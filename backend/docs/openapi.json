@@ -6829,6 +6829,796 @@
           }
         }
       }
+    },
+    "/auth/options": {
+      "get": {
+        "operationId": "get_auth_options",
+        "summary": "Which sign-in methods are enabled",
+        "description": "",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-roles": [
+          "PUBLIC"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AuthOptions"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/code/request": {
+      "post": {
+        "operationId": "post_auth_code_request",
+        "summary": "Send a 6-digit sign-in or reset code by SMS",
+        "description": "",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-roles": [
+          "PUBLIC"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpRequest"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/code/verify": {
+      "post": {
+        "operationId": "post_auth_code_verify",
+        "summary": "Verify a code: signs in an existing donor or returns a signup token",
+        "description": "",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-roles": [
+          "PUBLIC"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OtpVerifyResult"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpVerify"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/code/complete": {
+      "post": {
+        "operationId": "post_auth_code_complete",
+        "summary": "Finish phone sign-up with a name",
+        "description": "",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-roles": [
+          "PUBLIC"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Session"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtpComplete"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/reset": {
+      "post": {
+        "operationId": "post_auth_password_reset",
+        "summary": "Reset a donor password with an SMS code",
+        "description": "",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-roles": [
+          "PUBLIC"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordReset"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/requests/{requestId}/summary": {
+      "get": {
+        "operationId": "get_requests_requestId__summary",
+        "summary": "Live counts for a request",
+        "description": "",
+        "tags": [
+          "requests"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-roles": [
+          "FACILITY_USER",
+          "ADMIN"
+        ],
+        "parameters": [
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-fA-F0-9]{24}$",
+              "example": "0123456789abcdef01234567"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RequestSummary"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/config": {
+      "get": {
+        "operationId": "get_push_config",
+        "summary": "Whether push is enabled, and the public VAPID key",
+        "description": "",
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-roles": [
+          "DONOR",
+          "FACILITY_USER",
+          "ADMIN"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PushConfig"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/subscribe": {
+      "post": {
+        "operationId": "post_push_subscribe",
+        "summary": "Save a web push subscription for this device",
+        "description": "",
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-roles": [
+          "DONOR",
+          "FACILITY_USER",
+          "ADMIN"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PushResult"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebPushSubscription"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/expo": {
+      "post": {
+        "operationId": "post_push_expo",
+        "summary": "Save an Expo push token for the iOS or Android app",
+        "description": "",
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-roles": [
+          "DONOR",
+          "FACILITY_USER",
+          "ADMIN"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PushResult"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpoPushToken"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/push/unsubscribe": {
+      "post": {
+        "operationId": "post_push_unsubscribe",
+        "summary": "Remove a push subscription for this device",
+        "description": "",
+        "tags": [
+          "push"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "x-roles": [
+          "DONOR",
+          "FACILITY_USER",
+          "ADMIN"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "enum": [
+                        true
+                      ]
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PushResult"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "data"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Stable error envelope. No raw database errors or stacks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushUnsubscribe"
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -8650,7 +9440,202 @@
         "type": "object",
         "properties": {},
         "additionalProperties": false
+      },
+      "OtpRequest": {
+        "type": "object",
+        "required": [
+          "phone"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+2207123456",
+            "description": "Gambian number; local 7-digit numbers are normalised to +220"
+          },
+          "purpose": {
+            "type": "string",
+            "enum": [
+              "SIGN_IN",
+              "RESET"
+            ],
+            "default": "SIGN_IN"
+          }
+        }
+      },
+      "OtpVerify": {
+        "type": "object",
+        "required": [
+          "phone",
+          "code"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+2207123456",
+            "description": "Gambian number; local 7-digit numbers are normalised to +220"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        }
+      },
+      "OtpVerifyResult": {
+        "type": "object",
+        "description": "Either a full session for an existing donor, or a short-lived signup token for a new phone number",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "signupToken": {
+            "type": "string"
+          }
+        }
+      },
+      "OtpComplete": {
+        "type": "object",
+        "required": [
+          "signupToken",
+          "name"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "signupToken": {
+            "type": "string",
+            "minLength": 20,
+            "maxLength": 2000
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "PasswordReset": {
+        "type": "object",
+        "required": [
+          "phone",
+          "code",
+          "password"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "phone": {
+            "type": "string",
+            "example": "+2207123456",
+            "description": "Gambian number; local 7-digit numbers are normalised to +220"
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 8,
+            "maxLength": 72
+          }
+        }
+      },
+      "AuthOptions": {
+        "type": "object",
+        "properties": {
+          "otpEnabled": {
+            "type": "boolean"
+          },
+          "passwordEnabled": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": true
+      },
+      "RequestSummary": {
+        "type": "object",
+        "description": "Live counts for a request: donors alerted, accepted, arrived and units received",
+        "additionalProperties": true
+      },
+      "PushConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "publicKey": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WebPushSubscription": {
+        "type": "object",
+        "required": [
+          "endpoint",
+          "keys"
+        ],
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "keys": {
+            "type": "object",
+            "properties": {
+              "p256dh": {
+                "type": "string"
+              },
+              "auth": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "ExpoPushToken": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "ExponentPushToken[xxxxxxxx]"
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "ios",
+              "android"
+            ]
+          }
+        }
+      },
+      "PushUnsubscribe": {
+        "type": "object",
+        "required": [
+          "endpoint"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        }
+      },
+      "PushResult": {
+        "type": "object",
+        "additionalProperties": true
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "push",
+      "description": "Device registration for alert delivery"
+    }
+  ]
 }

@@ -10,6 +10,7 @@ import { donorRoutes } from '../src/routes/donorRoutes.js';
 import { facilityRoutes } from '../src/routes/facilityRoutes.js';
 import { requestRoutes } from '../src/routes/requestRoutes.js';
 import { notificationRoutes } from '../src/routes/notificationRoutes.js';
+import { pushRoutes } from '../src/routes/pushRoutes.js';
 import { BLOOD_TYPES, STAFF_PERMISSIONS } from '../src/config/domain.js';
 const config = parseEnv({ MONGODB_URI: 'mongodb://127.0.0.1/test', JWT_SECRET: 'documentation-test-only-secret-more-than-32-characters' });
 const methods = ['get', 'put', 'post', 'patch', 'delete'];
@@ -21,14 +22,14 @@ describe('complete public API documentation', () => {
     for (const layer of app.router.stack.filter(l => l.route)) {
       for (const method of Object.keys(layer.route.methods)) operations.add(method + ' ' + layer.route.path.replace('/api/v1', ''));
     }
-    const routers = [['/auth', authRoutes(config, (_req, _res, next) => next())], ['/admin', adminRoutes(config)], ['/facilities', facilityRoutes(config)], ['/donors', donorRoutes(config)], ['/requests', requestRoutes(config)], ['/notifications', notificationRoutes(config)]];
+    const routers = [['/auth', authRoutes(config, (_req, _res, next) => next())], ['/admin', adminRoutes(config)], ['/facilities', facilityRoutes(config)], ['/donors', donorRoutes(config)], ['/requests', requestRoutes(config)], ['/notifications', notificationRoutes(config)], ['/push', pushRoutes(config)]];
     expect(app.router.stack.filter(l => l.name === 'router')).toHaveLength(routers.length);
     for (const [prefix, router] of routers) for (const layer of router.stack.filter(l => l.route)) {
       const path = (prefix + (layer.route.path === '/' ? '' : layer.route.path)).replace(/:(\w+)/g, '{$1}');
       for (const method of Object.keys(layer.route.methods)) operations.add(method + ' ' + path);
     }
     const documented = new Set(Object.entries(apiDocumentation.paths).flatMap(([path, ops]) => methods.filter(m => ops[m]).map(m => m + ' ' + path)));
-    expect(documented).toEqual(operations); expect(documented.size).toBe(43);
+    expect(documented).toEqual(operations); expect(documented.size).toBe(53);
     expect([...documented].some(x => /nearby|search-donors|\/matches/.test(x))).toBe(false);
   });
   it('assigns security and explicit role metadata to every operation', () => {
