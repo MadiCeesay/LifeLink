@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main, production-web]
   pull_request:
+    branches: [main]
 
 jobs:
   backend:
