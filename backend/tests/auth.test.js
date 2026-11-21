@@ -19,6 +19,7 @@ beforeAll(async () => {
   mongo = await createTestDatabase();
   await connectDatabase(mongo.getUri());
   await User.init();
+  await User.createIndexes();
   app = createApp(config, { authLimit: 1000, apiLimit: 2000 });
 });
 beforeEach(async () => { await User.deleteMany({}); });
